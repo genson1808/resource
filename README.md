@@ -130,3 +130,117 @@ https://code.visualstudio.com/docs/cpp/config-wsl
     }
 }
 ```
+
+
+
+```bash
+sudo apt-get update
+sudo apt-get install libssl-dev openssl
+```
+rsa_example.cpp
+```cpp
+#include <iostream>
+#include <openssl/rsa.h>
+#include <openssl/pem.h>
+#include <openssl/err.h>
+#include <string>
+
+using namespace std;
+
+// Hàm tạo khóa RSA và lưu vào file
+void GenerateRSAKey(int keyLength, const string& publicKeyFile, const string& privateKeyFile) {
+    // Tạo bộ sinh số ngẫu nhiên
+    RSA* rsa = RSA_new();
+    BIGNUM* bn = BN_new();
+    BN_set_word(bn, RSA_F4);  // Sử dụng hằng số RSA_F4
+
+    // Tạo khóa RSA
+    RSA_generate_key_ex(rsa, keyLength, bn, NULL);
+
+    // Lưu khóa công khai vào file
+    FILE* pubFile = fopen(publicKeyFile.c_str(), "wb");
+    PEM_write_RSA_PUBKEY(pubFile, rsa);
+    fclose(pubFile);
+
+    // Lưu khóa riêng vào file
+    FILE* privFile = fopen(privateKeyFile.c_str(), "wb");
+    PEM_write_RSAPrivateKey(privFile, rsa, NULL, NULL, 0, NULL, NULL);
+    fclose(privFile);
+
+    // Dọn dẹp bộ nhớ
+    RSA_free(rsa);
+    BN_free(bn);
+}
+
+// Hàm mã hóa bằng RSA
+string RSAEncrypt(const string& publicKeyFile, const string& message) {
+    FILE* pubFile = fopen(publicKeyFile.c_str(), "rb");
+    RSA* rsa = PEM_read_RSA_PUBKEY(pubFile, NULL, NULL, NULL);
+    fclose(pubFile);
+
+    // Mã hóa thông điệp
+    int rsaLen = RSA_size(rsa);
+    unsigned char* encrypted = new unsigned char[rsaLen];
+    RSA_public_encrypt(message.size(), (unsigned char*)message.c_str(), encrypted, rsa, RSA_PKCS1_OAEP_PADDING);
+
+    string cipherText((char*)encrypted, rsaLen);
+    delete[] encrypted;
+    RSA_free(rsa);
+
+    return cipherText;
+}
+
+// Hàm giải mã bằng RSA
+string RSADecrypt(const string& privateKeyFile, const string& cipherText) {
+    FILE* privFile = fopen(privateKeyFile.c_str(), "rb");
+    RSA* rsa = PEM_read_RSAPrivateKey(privFile, NULL, NULL, NULL);
+    fclose(privFile);
+
+    // Giải mã thông điệp
+    int rsaLen = RSA_size(rsa);
+    unsigned char* decrypted = new unsigned char[rsaLen];
+    RSA_private_decrypt(cipherText.size(), (unsigned char*)cipherText.c_str(), decrypted, rsa, RSA_PKCS1_OAEP_PADDING);
+
+    string message((char*)decrypted);
+    delete[] decrypted;
+    RSA_free(rsa);
+
+    return message;
+}
+
+int main() {
+    // Tên file chứa khóa
+    string publicKeyFile = "public.pem";
+    string privateKeyFile = "private.pem";
+
+    // Tạo cặp khóa RSA
+    GenerateRSAKey(2048, publicKeyFile, privateKeyFile);
+    cout << "Generated RSA Key Pair." << endl;
+
+    // Thông điệp cần mã hóa
+    string message = "Hello, OpenSSL RSA!";
+    cout << "Original Message: " << message << endl;
+
+    // Mã hóa thông điệp
+    string cipherText = RSAEncrypt(publicKeyFile, message);
+    cout << "Encrypted Message: " << cipherText << endl;
+
+    // Giải mã thông điệp
+    string decryptedMessage = RSADecrypt(privateKeyFile, cipherText);
+    cout << "Decrypted Message: " << decryptedMessage << endl;
+
+    return 0;
+}
+
+```
+
+```bash
+g++ rsa_example.cpp -o rsa_example -lssl -lcrypto
+
+./rsa_example
+```
+
+-lssl: Liên kết thư viện libssl.
+-lcrypto: Liên kết thư viện libcrypto của OpenSSL.
+
+
