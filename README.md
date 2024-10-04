@@ -67,3 +67,6 @@ keymap("t", "<C-l>", "<C-\\><C-n><C-w>l", default_opts)
 
 keymap("t", "<C-j>", require("cmp").mapping.select_next_item(), default_opts)
 ```
+
+
+https://code.visualstudio.com/docs/cpp/config-wsl
