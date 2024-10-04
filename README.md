@@ -70,3 +70,63 @@ keymap("t", "<C-j>", require("cmp").mapping.select_next_item(), default_opts)
 
 
 https://code.visualstudio.com/docs/cpp/config-wsl
+
+
+
+# setting vscode 
+```json
+{
+    "workbench.colorTheme": "Andromeda",
+    "tabnine.experimentalAutoImports": true,
+    "workbench.iconTheme": "material-icon-theme",
+    "editor.fontFamily": "'FireaCode nerdfont', Menlo, Monaco, 'Courier New', monospace",
+    "editor.fontSize": 14,
+    "debug.console.fontSize": 14,
+    "scm.inputFontSize": 14,
+    "terminal.integrated.fontSize": 13,
+    "chat.editor.fontSize": 13,
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "editor.cursorSmoothCaretAnimation": "on",
+    "workbench.settings.applyToAllProfiles": [
+
+    ],
+    "editor.lineNumbers": "relative",
+    "vim.easymotion": true,
+    "vim.incsearch": true,
+    "vim.useSystemClipboard": true,
+    "vim.useCtrlKeys": true,
+    "vim.hlsearch": true,
+    "vim.insertModeKeyBindings": [
+        {
+        "before": ["j", "k"],
+        "after": ["<Esc>"]
+        }
+    ],
+    "vim.normalModeKeyBindingsNonRecursive": [
+        {
+        "before": ["<leader>", "d"],
+        "after": ["d", "d"]
+        },
+        {
+        "before": ["<C-n>"],
+        "commands": [":nohl"]
+        },
+        {
+        "before": ["K"],
+        "commands": ["lineBreakInsert"],
+        "silent": true
+        }
+    ],
+    "vim.leader": "<space>",
+    "vim.handleKeys": {
+        "<C-a>": false,
+        "<C-f>": false
+    },
+    "// To improve performance",
+    "extensions.experimental.affinity": {
+        "vscodevim.vim": 1
+    }
+}
+```
