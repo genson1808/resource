@@ -240,6 +240,167 @@ g++ rsa_example.cpp -o rsa_example -lssl -lcrypto
 ./rsa_example
 ```
 
+
+
+
+```cpp
+#include <iostream>
+#include <fstream>
+#include <openssl/pem.h>
+#include <openssl/rsa.h>
+#include <openssl/err.h>
+#include <string>
+
+using namespace std;
+
+// Định nghĩa mã lỗi theo bảng mã lỗi trong hình ảnh
+enum ErrorCode {
+    UNKNOWN_ERROR = -1,
+    SUCCESS = 0,
+    PUBLIC_KEY_READ_ERROR = 1,
+    PUBLIC_KEY_FORMAT_ERROR = 2,
+    PRIVATE_KEY_READ_ERROR = 3,
+    PRIVATE_KEY_FORMAT_ERROR = 4,
+    ACTIVE_KEY_READ_ERROR = 5,
+    ACTIVE_KEY_FORMAT_ERROR = 6,
+    LICENSE_KEY_OUTPUT_ERROR = 7,
+    LICENSE_KEY_PATH_ERROR = 8,
+    OPTION_CODE_READ_ERROR = 9,
+    OPTION_CODE_FORMAT_ERROR = 10
+};
+
+// Hàm kiểm tra định dạng của khóa công khai RSA
+int validatePublicKey(const string& publicKeyFile) {
+    FILE* file = fopen(publicKeyFile.c_str(), "rb");
+    if (!file) {
+        return PUBLIC_KEY_READ_ERROR;  // Không thể đọc khóa công khai
+    }
+
+    RSA* rsa = PEM_read_RSA_PUBKEY(file, NULL, NULL, NULL);
+    if (!rsa) {
+        fclose(file);
+        return PUBLIC_KEY_FORMAT_ERROR;  // Định dạng khóa công khai không hợp lệ
+    }
+
+    RSA_free(rsa);
+    fclose(file);
+    return SUCCESS;  // Khóa công khai hợp lệ
+}
+
+// Hàm kiểm tra định dạng của khóa riêng RSA
+int validatePrivateKey(const string& privateKeyFile) {
+    FILE* file = fopen(privateKeyFile.c_str(), "rb");
+    if (!file) {
+        return PRIVATE_KEY_READ_ERROR;  // Không thể đọc khóa riêng
+    }
+
+    RSA* rsa = PEM_read_RSAPrivateKey(file, NULL, NULL, NULL);
+    if (!rsa) {
+        fclose(file);
+        return PRIVATE_KEY_FORMAT_ERROR;  // Định dạng khóa riêng không hợp lệ
+    }
+
+    RSA_free(rsa);
+    fclose(file);
+    return SUCCESS;  // Khóa riêng hợp lệ
+}
+
+// Hàm kiểm tra định dạng của khóa hoạt động
+int validateActiveKey(const string& activeKeyFile) {
+    FILE* file = fopen(activeKeyFile.c_str(), "rb");
+    if (!file) {
+        return ACTIVE_KEY_READ_ERROR;  // Không thể đọc khóa hoạt động
+    }
+
+    RSA* rsa = PEM_read_RSA_PUBKEY(file, NULL, NULL, NULL);
+    if (!rsa) {
+        fclose(file);
+        return ACTIVE_KEY_FORMAT_ERROR;  // Định dạng khóa hoạt động không hợp lệ
+    }
+
+    RSA_free(rsa);
+    fclose(file);
+    return SUCCESS;  // Khóa hoạt động hợp lệ
+}
+
+// Hàm kiểm tra License Key và xuất ra file
+int outputLicenseKey(const string& licenseKeyFile, const string& licenseKeyPath) {
+    ofstream outFile(licenseKeyPath);
+    if (!outFile.is_open()) {
+        return LICENSE_KEY_OUTPUT_ERROR;  // Không thể xuất License Key ra file
+    }
+
+    outFile << licenseKeyFile;
+    outFile.close();
+    return SUCCESS;  // Xuất License Key thành công
+}
+
+// Hàm kiểm tra mã tùy chọn (option code)
+int validateOptionCode(const string& optionCode) {
+    if (optionCode.empty()) {
+        return OPTION_CODE_READ_ERROR;  // Không thể đọc mã tùy chọn
+    }
+    
+    // Kiểm tra định dạng của mã tùy chọn, ở đây chỉ là ví dụ về độ dài > 0
+    if (optionCode.length() < 5) {
+        return OPTION_CODE_FORMAT_ERROR;  // Định dạng mã tùy chọn không hợp lệ
+    }
+
+    return SUCCESS;  // Mã tùy chọn hợp lệ
+}
+
+// Hàm trả về mô tả mã lỗi
+string getErrorDescription(int errorCode) {
+    switch (errorCode) {
+        case UNKNOWN_ERROR: return "Unknown error.";
+        case SUCCESS: return "Success.";
+        case PUBLIC_KEY_READ_ERROR: return "Public Key could not be read.";
+        case PUBLIC_KEY_FORMAT_ERROR: return "Invalid Public Key format.";
+        case PRIVATE_KEY_READ_ERROR: return "Private Key could not be read.";
+        case PRIVATE_KEY_FORMAT_ERROR: return "Invalid Private Key format.";
+        case ACTIVE_KEY_READ_ERROR: return "Active Key could not be read.";
+        case ACTIVE_KEY_FORMAT_ERROR: return "Invalid Active Key format.";
+        case LICENSE_KEY_OUTPUT_ERROR: return "Could not output License Key to the specified path.";
+        case LICENSE_KEY_PATH_ERROR: return "Invalid License Key path format.";
+        case OPTION_CODE_READ_ERROR: return "Could not read Option Code.";
+        case OPTION_CODE_FORMAT_ERROR: return "Invalid Option Code format.";
+        default: return "Error code not recognized.";
+    }
+}
+
+int main() {
+    string publicKeyFile = "public.pem";
+    string privateKeyFile = "private.pem";
+    string activeKeyFile = "active.pem";
+    string licenseKey = "example_license_key";
+    string licenseKeyPath = "license_key.txt";
+    string optionCode = "12345";  // Mã tùy chọn để kiểm tra
+
+    // Kiểm tra khóa công khai
+    int pubKeyStatus = validatePublicKey(publicKeyFile);
+    cout << "Public Key Validation: " << getErrorDescription(pubKeyStatus) << endl;
+
+    // Kiểm tra khóa riêng
+    int privKeyStatus = validatePrivateKey(privateKeyFile);
+    cout << "Private Key Validation: " << getErrorDescription(privKeyStatus) << endl;
+
+    // Kiểm tra khóa hoạt động
+    int activeKeyStatus = validateActiveKey(activeKeyFile);
+    cout << "Active Key Validation: " << getErrorDescription(activeKeyStatus) << endl;
+
+    // Kiểm tra xuất License Key
+    int licenseKeyStatus = outputLicenseKey(licenseKey, licenseKeyPath);
+    cout << "License Key Output: " << getErrorDescription(licenseKeyStatus) << endl;
+
+    // Kiểm tra mã tùy chọn
+    int optionCodeStatus = validateOptionCode(optionCode);
+    cout << "Option Code Validation: " << getErrorDescription(optionCodeStatus) << endl;
+
+    return 0;
+}
+
+```
+
 -lssl: Liên kết thư viện libssl.
 -lcrypto: Liên kết thư viện libcrypto của OpenSSL.
 
