@@ -328,7 +328,113 @@ int main() {
 ```
 
 
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+#include <openssl/rsa.h>
+#include <openssl/pem.h>
+#include <openssl/err.h>
+#include <openssl/sha.h>
 
+// Enum cho mã lỗi
+enum class ErrorCode {
+    SUCCESS = 0,
+    SIGNATURE_INVALID,
+    MAC_NOT_FOUND,
+    RSA_ERROR,
+};
+
+// Kết quả cho xác thực
+template <typename T>
+class Result {
+public:
+    ErrorCode code;              // Mã lỗi
+    std::string error_message;   // Thông báo lỗi
+    T result_value;              // Giá trị trả về nếu thành công
+
+    // Constructor cho trường hợp thành công
+    Result(ErrorCode c, const T& value)
+        : code(c), result_value(value), error_message(getErrorMessage(c)) {}
+
+    // Constructor cho trường hợp lỗi
+    Result(ErrorCode c)
+        : code(c), result_value(T()), error_message(getErrorMessage(c)) {}
+
+private:
+    // Hàm lấy thông điệp lỗi từ mã
+    static std::string getErrorMessage(ErrorCode code) {
+        switch (code) {
+            case ErrorCode::SUCCESS: return "Success";
+            case ErrorCode::SIGNATURE_INVALID: return "Invalid signature";
+            case ErrorCode::MAC_NOT_FOUND: return "MAC address not found";
+            case ErrorCode::RSA_ERROR: return "RSA error occurred";
+            default: return "Unknown error";
+        }
+    }
+};
+
+// Hàm xác thực chữ ký
+Result<bool> verifySignature(const std::string& macAddress, const std::string& signature, RSA* publicKey) {
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256(reinterpret_cast<const unsigned char*>(macAddress.c_str()), macAddress.length(), hash);
+
+    int result = RSA_verify(NID_sha256, hash, SHA256_DIGEST_LENGTH,
+                            reinterpret_cast<const unsigned char*>(signature.c_str()), 
+                            signature.length(), publicKey);
+    if (result == -1) {
+        return Result<bool>(ErrorCode::RSA_ERROR); // Lỗi khi gọi hàm RSA_verify
+    }
+    return (result == 1) ? Result<bool>(ErrorCode::SUCCESS, true) : Result<bool>(ErrorCode::SIGNATURE_INVALID);
+}
+
+int main() {
+    std::vector<std::string> macAddresses = {
+        "00:1A:2B:3C:4D:5E",
+        "00:1A:2B:3C:4D:5F",
+        "00:1A:2B:3C:4D:60"
+    };
+
+    std::string signedMacAddress = "00:1A:2B:3C:4D:5E"; // MAC address đã ký
+    std::string signature = "..."; // Chữ ký đã được tạo từ MAC address
+
+    // Đọc khóa công khai từ file
+    FILE* pubKeyFile = fopen("public.pem", "r");
+    if (!pubKeyFile) {
+        std::cerr << "Failed to open public key file." << std::endl;
+        return -1;
+    }
+    
+    RSA* publicKey = PEM_read_RSA_PUBKEY(pubKeyFile, nullptr, nullptr, nullptr);
+    fclose(pubKeyFile);
+    if (!publicKey) {
+        std::cerr << "Failed to read public key." << std::endl;
+        return -1;
+    }
+
+    bool isVerified = false;
+
+    // Kiểm tra xác thực cho từng MAC address
+    for (const auto& mac : macAddresses) {
+        Result<bool> res = verifySignature(mac, signature, publicKey);
+        if (res.code == ErrorCode::SUCCESS) {
+            isVerified = true;
+            std::cout << "Verified successfully for MAC address: " << mac << std::endl;
+            break; // Dừng khi xác thực thành công
+        } else {
+            std::cout << "Verification failed for MAC address: " << mac 
+                      << ". Error: " << res.error_message << std::endl;
+        }
+    }
+
+    if (!isVerified) {
+        std::cout << "No valid MAC address found for the provided signature." << std::endl;
+    }
+
+    RSA_free(publicKey); // Giải phóng khóa
+    return 0;
+}
+```
 
 https://nexwebsites.com/blog/cpp_exceptions/
 
