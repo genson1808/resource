@@ -184,3 +184,73 @@ int main() {
     return 0;
 }
 ```
+
+
+```cpp
+
+#include <iostream>
+#include <string>
+
+enum class ErrorCode {
+    SUCCESS = 3,
+    USERNAME_INVALID = 0,
+    PASSWORD_INVALID = 1,
+    EMPTY_FIELD = 2,
+    ERROR_COUNT // Số lượng thông điệp lỗi
+};
+
+class Result {
+public:
+    ErrorCode code;            // Mã lỗi
+    std::string error_message; // Thông báo lỗi
+    std::string result;        // Giá trị trả về nếu thành công
+
+    // Constructor cho trường hợp thành công
+    Result(ErrorCode c, const std::string& res) : code(c), result(res), error_message(getErrorMessage(c)) {}
+
+    // Constructor cho trường hợp lỗi
+    Result(ErrorCode c) : code(c), result(""), error_message(getErrorMessage(c)) {}
+
+private:
+    // Mảng tĩnh chứa các thông điệp lỗi
+    static const char* errorMessages[];
+
+    // Hàm lấy thông điệp lỗi từ mã
+    static const char* getErrorMessage(ErrorCode code) {
+        if (static_cast<int>(code) >= 0 && static_cast<int>(code) < static_cast<int>(ErrorCode::ERROR_COUNT)) {
+            return errorMessages[static_cast<int>(code)];
+        }
+        return "Unknown error";
+    }
+};
+
+// Khởi tạo các thông điệp lỗi
+const char* Result::errorMessages[] = {
+    "Username cannot be empty", // 0
+    "Password is invalid",      // 1
+    "Field cannot be empty",    // 2
+    "Success"                   // 3
+};
+
+// Hàm mẫu để kiểm tra người dùng
+Result validateUser(const std::string& username) {
+    if (username.empty()) {
+        return Result(ErrorCode::USERNAME_INVALID); // Chỉ cần trả mã lỗi
+    }
+    return Result(ErrorCode::SUCCESS, username); // Trả về username như là kết quả
+}
+
+int main() {
+    Result res = validateUser("");
+    
+    if (res.code != ErrorCode::SUCCESS) {
+        std::cout << "Error: " << res.error_message << std::endl;
+    } else {
+        std::cout << "Result: " << res.result << std::endl; // Hiển thị kết quả
+    }
+
+    return 0;
+}
+```
+
+
