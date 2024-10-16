@@ -139,3 +139,48 @@ int main() {
     return 0;
 }
 ```
+
+```cpp
+#include <iostream>
+#include <string>
+
+enum class ErrorCode {
+    SUCCESS = 3,
+    USERNAME_INVALID = 0,
+    PASSWORD_INVALID = 1,
+};
+
+template <typename T>
+class Result {
+public:
+    ErrorCode code;           // Mã lỗi
+    std::string error_message; // Thông báo lỗi
+    T result;                // Giá trị trả về nếu thành công
+
+    // Constructor cho trường hợp thành công
+    Result(ErrorCode c, const T& res) : code(c), result(res), error_message("Success") {}
+
+    // Constructor cho trường hợp lỗi
+    Result(ErrorCode c, const std::string& msg) : code(c), result(T()), error_message(msg) {}
+};
+
+// Hàm mẫu
+Result<std::string> validateUser(const std::string& username) {
+    if (username.empty()) {
+        return Result<std::string>(ErrorCode::USERNAME_INVALID, "Username cannot be empty");
+    }
+    return Result<std::string>(ErrorCode::SUCCESS, username); // Trả về username như là kết quả
+}
+
+int main() {
+    Result<std::string> res = validateUser("test_user");
+    
+    if (res.code != ErrorCode::SUCCESS) {
+        std::cout << "Error: " << res.error_message << std::endl;
+    } else {
+        std::cout << "Result: " << res.result << std::endl; // Hiển thị kết quả
+    }
+
+    return 0;
+}
+```
