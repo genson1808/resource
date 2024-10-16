@@ -254,3 +254,8 @@ int main() {
 ```
 
 
+
+https://nexwebsites.com/blog/cpp_exceptions/
+
+
+https://hackingcpp.com/cpp/lang/exceptions.html
