@@ -253,9 +253,85 @@ int main() {
 }
 ```
 
+```cpp
+
+#include <iostream>
+#include <string>
+
+enum class ErrorCode {
+    SUCCESS = 0,
+    USERNAME_INVALID,
+    PASSWORD_INVALID,
+    EMPTY_FIELD,
+    ERROR_COUNT // Đếm số lượng thông điệp lỗi
+};
+
+template <typename T>
+class Result {
+public:
+    ErrorCode code;              // Mã lỗi
+    std::string error_message;   // Thông báo lỗi
+    T result_value;              // Giá trị trả về nếu thành công
+
+    // Constructor cho trường hợp thành công
+    Result(ErrorCode c, const T& value)
+        : code(c), result_value(value), error_message(getErrorMessage(c)) {}
+
+    // Constructor cho trường hợp lỗi
+    Result(ErrorCode c)
+        : code(c), result_value(T()), error_message(getErrorMessage(c)) {}
+
+private:
+    // Mảng tĩnh chứa các thông điệp lỗi
+    static const std::string errorMessages[];
+
+    // Hàm lấy thông điệp lỗi từ mã
+    static std::string getErrorMessage(ErrorCode code) {
+        if (static_cast<int>(code) >= 0 && static_cast<int>(code) < static_cast<int>(ErrorCode::ERROR_COUNT)) {
+            return errorMessages[static_cast<int>(code)];
+        }
+        return "Unknown error"; // Xử lý trường hợp mã lỗi không hợp lệ
+    }
+};
+
+// Khởi tạo các thông điệp lỗi
+template <typename T>
+const std::string Result<T>::errorMessages[] = {
+    "Success",                   // 0
+    "Username is invalid",       // 1
+    "Password is invalid",       // 2
+    "Field cannot be empty"      // 3
+};
+
+// Hàm mẫu để kiểm tra người dùng
+Result<std::string> validateUser(const std::string& username, const std::string& password) {
+    if (username.empty()) {
+        return Result<std::string>(ErrorCode::USERNAME_INVALID); // Trả về mã lỗi
+    }
+    if (password.empty()) {
+        return Result<std::string>(ErrorCode::EMPTY_FIELD); // Trả về mã lỗi
+    }
+    return Result<std::string>(ErrorCode::SUCCESS, username); // Trả về username như là kết quả
+}
+
+int main() {
+    Result<std::string> res = validateUser("", "password");
+
+    if (res.code != ErrorCode::SUCCESS) {
+        std::cout << "Error: " << res.error_message << std::endl; // Hiển thị thông báo lỗi
+    } else {
+        std::cout << "Result: " << res.result_value << std::endl; // Hiển thị kết quả
+    }
+
+    return 0;
+}
+```
+
+
 
 
 https://nexwebsites.com/blog/cpp_exceptions/
 
 
 https://hackingcpp.com/cpp/lang/exceptions.html
+
