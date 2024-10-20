@@ -139,3 +139,305 @@ int main() {
     return 0;
 }
 ```
+
+```cpp
+#include <iostream>
+#include <string>
+
+enum class ErrorCode {
+    SUCCESS = 3,
+    USERNAME_INVALID = 0,
+    PASSWORD_INVALID = 1,
+};
+
+template <typename T>
+class Result {
+public:
+    ErrorCode code;           // Mã lỗi
+    std::string error_message; // Thông báo lỗi
+    T result;                // Giá trị trả về nếu thành công
+
+    // Constructor cho trường hợp thành công
+    Result(ErrorCode c, const T& res) : code(c), result(res), error_message("Success") {}
+
+    // Constructor cho trường hợp lỗi
+    Result(ErrorCode c, const std::string& msg) : code(c), result(T()), error_message(msg) {}
+};
+
+// Hàm mẫu
+Result<std::string> validateUser(const std::string& username) {
+    if (username.empty()) {
+        return Result<std::string>(ErrorCode::USERNAME_INVALID, "Username cannot be empty");
+    }
+    return Result<std::string>(ErrorCode::SUCCESS, username); // Trả về username như là kết quả
+}
+
+int main() {
+    Result<std::string> res = validateUser("test_user");
+    
+    if (res.code != ErrorCode::SUCCESS) {
+        std::cout << "Error: " << res.error_message << std::endl;
+    } else {
+        std::cout << "Result: " << res.result << std::endl; // Hiển thị kết quả
+    }
+
+    return 0;
+}
+```
+
+
+```cpp
+
+#include <iostream>
+#include <string>
+
+enum class ErrorCode {
+    SUCCESS = 3,
+    USERNAME_INVALID = 0,
+    PASSWORD_INVALID = 1,
+    EMPTY_FIELD = 2,
+    ERROR_COUNT // Số lượng thông điệp lỗi
+};
+
+class Result {
+public:
+    ErrorCode code;            // Mã lỗi
+    std::string error_message; // Thông báo lỗi
+    std::string result;        // Giá trị trả về nếu thành công
+
+    // Constructor cho trường hợp thành công
+    Result(ErrorCode c, const std::string& res) : code(c), result(res), error_message(getErrorMessage(c)) {}
+
+    // Constructor cho trường hợp lỗi
+    Result(ErrorCode c) : code(c), result(""), error_message(getErrorMessage(c)) {}
+
+private:
+    // Mảng tĩnh chứa các thông điệp lỗi
+    static const char* errorMessages[];
+
+    // Hàm lấy thông điệp lỗi từ mã
+    static const char* getErrorMessage(ErrorCode code) {
+        if (static_cast<int>(code) >= 0 && static_cast<int>(code) < static_cast<int>(ErrorCode::ERROR_COUNT)) {
+            return errorMessages[static_cast<int>(code)];
+        }
+        return "Unknown error";
+    }
+};
+
+// Khởi tạo các thông điệp lỗi
+const char* Result::errorMessages[] = {
+    "Username cannot be empty", // 0
+    "Password is invalid",      // 1
+    "Field cannot be empty",    // 2
+    "Success"                   // 3
+};
+
+// Hàm mẫu để kiểm tra người dùng
+Result validateUser(const std::string& username) {
+    if (username.empty()) {
+        return Result(ErrorCode::USERNAME_INVALID); // Chỉ cần trả mã lỗi
+    }
+    return Result(ErrorCode::SUCCESS, username); // Trả về username như là kết quả
+}
+
+int main() {
+    Result res = validateUser("");
+    
+    if (res.code != ErrorCode::SUCCESS) {
+        std::cout << "Error: " << res.error_message << std::endl;
+    } else {
+        std::cout << "Result: " << res.result << std::endl; // Hiển thị kết quả
+    }
+
+    return 0;
+}
+```
+
+```cpp
+
+#include <iostream>
+#include <string>
+
+enum class ErrorCode {
+    SUCCESS = 0,
+    USERNAME_INVALID,
+    PASSWORD_INVALID,
+    EMPTY_FIELD,
+    ERROR_COUNT // Đếm số lượng thông điệp lỗi
+};
+
+template <typename T>
+class Result {
+public:
+    ErrorCode code;              // Mã lỗi
+    std::string error_message;   // Thông báo lỗi
+    T result_value;              // Giá trị trả về nếu thành công
+
+    // Constructor cho trường hợp thành công
+    Result(ErrorCode c, const T& value)
+        : code(c), result_value(value), error_message(getErrorMessage(c)) {}
+
+    // Constructor cho trường hợp lỗi
+    Result(ErrorCode c)
+        : code(c), result_value(T()), error_message(getErrorMessage(c)) {}
+
+private:
+    // Mảng tĩnh chứa các thông điệp lỗi
+    static const std::string errorMessages[];
+
+    // Hàm lấy thông điệp lỗi từ mã
+    static std::string getErrorMessage(ErrorCode code) {
+        if (static_cast<int>(code) >= 0 && static_cast<int>(code) < static_cast<int>(ErrorCode::ERROR_COUNT)) {
+            return errorMessages[static_cast<int>(code)];
+        }
+        return "Unknown error"; // Xử lý trường hợp mã lỗi không hợp lệ
+    }
+};
+
+// Khởi tạo các thông điệp lỗi
+template <typename T>
+const std::string Result<T>::errorMessages[] = {
+    "Success",                   // 0
+    "Username is invalid",       // 1
+    "Password is invalid",       // 2
+    "Field cannot be empty"      // 3
+};
+
+// Hàm mẫu để kiểm tra người dùng
+Result<std::string> validateUser(const std::string& username, const std::string& password) {
+    if (username.empty()) {
+        return Result<std::string>(ErrorCode::USERNAME_INVALID); // Trả về mã lỗi
+    }
+    if (password.empty()) {
+        return Result<std::string>(ErrorCode::EMPTY_FIELD); // Trả về mã lỗi
+    }
+    return Result<std::string>(ErrorCode::SUCCESS, username); // Trả về username như là kết quả
+}
+
+int main() {
+    Result<std::string> res = validateUser("", "password");
+
+    if (res.code != ErrorCode::SUCCESS) {
+        std::cout << "Error: " << res.error_message << std::endl; // Hiển thị thông báo lỗi
+    } else {
+        std::cout << "Result: " << res.result_value << std::endl; // Hiển thị kết quả
+    }
+
+    return 0;
+}
+```
+
+
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+#include <openssl/rsa.h>
+#include <openssl/pem.h>
+#include <openssl/err.h>
+#include <openssl/sha.h>
+
+// Enum cho mã lỗi
+enum class ErrorCode {
+    SUCCESS = 0,
+    SIGNATURE_INVALID,
+    MAC_NOT_FOUND,
+    RSA_ERROR,
+};
+
+// Kết quả cho xác thực
+template <typename T>
+class Result {
+public:
+    ErrorCode code;              // Mã lỗi
+    std::string error_message;   // Thông báo lỗi
+    T result_value;              // Giá trị trả về nếu thành công
+
+    // Constructor cho trường hợp thành công
+    Result(ErrorCode c, const T& value)
+        : code(c), result_value(value), error_message(getErrorMessage(c)) {}
+
+    // Constructor cho trường hợp lỗi
+    Result(ErrorCode c)
+        : code(c), result_value(T()), error_message(getErrorMessage(c)) {}
+
+private:
+    // Hàm lấy thông điệp lỗi từ mã
+    static std::string getErrorMessage(ErrorCode code) {
+        switch (code) {
+            case ErrorCode::SUCCESS: return "Success";
+            case ErrorCode::SIGNATURE_INVALID: return "Invalid signature";
+            case ErrorCode::MAC_NOT_FOUND: return "MAC address not found";
+            case ErrorCode::RSA_ERROR: return "RSA error occurred";
+            default: return "Unknown error";
+        }
+    }
+};
+
+// Hàm xác thực chữ ký
+Result<bool> verifySignature(const std::string& macAddress, const std::string& signature, RSA* publicKey) {
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256(reinterpret_cast<const unsigned char*>(macAddress.c_str()), macAddress.length(), hash);
+
+    int result = RSA_verify(NID_sha256, hash, SHA256_DIGEST_LENGTH,
+                            reinterpret_cast<const unsigned char*>(signature.c_str()), 
+                            signature.length(), publicKey);
+    if (result == -1) {
+        return Result<bool>(ErrorCode::RSA_ERROR); // Lỗi khi gọi hàm RSA_verify
+    }
+    return (result == 1) ? Result<bool>(ErrorCode::SUCCESS, true) : Result<bool>(ErrorCode::SIGNATURE_INVALID);
+}
+
+int main() {
+    std::vector<std::string> macAddresses = {
+        "00:1A:2B:3C:4D:5E",
+        "00:1A:2B:3C:4D:5F",
+        "00:1A:2B:3C:4D:60"
+    };
+
+    std::string signedMacAddress = "00:1A:2B:3C:4D:5E"; // MAC address đã ký
+    std::string signature = "..."; // Chữ ký đã được tạo từ MAC address
+
+    // Đọc khóa công khai từ file
+    FILE* pubKeyFile = fopen("public.pem", "r");
+    if (!pubKeyFile) {
+        std::cerr << "Failed to open public key file." << std::endl;
+        return -1;
+    }
+    
+    RSA* publicKey = PEM_read_RSA_PUBKEY(pubKeyFile, nullptr, nullptr, nullptr);
+    fclose(pubKeyFile);
+    if (!publicKey) {
+        std::cerr << "Failed to read public key." << std::endl;
+        return -1;
+    }
+
+    bool isVerified = false;
+
+    // Kiểm tra xác thực cho từng MAC address
+    for (const auto& mac : macAddresses) {
+        Result<bool> res = verifySignature(mac, signature, publicKey);
+        if (res.code == ErrorCode::SUCCESS) {
+            isVerified = true;
+            std::cout << "Verified successfully for MAC address: " << mac << std::endl;
+            break; // Dừng khi xác thực thành công
+        } else {
+            std::cout << "Verification failed for MAC address: " << mac 
+                      << ". Error: " << res.error_message << std::endl;
+        }
+    }
+
+    if (!isVerified) {
+        std::cout << "No valid MAC address found for the provided signature." << std::endl;
+    }
+
+    RSA_free(publicKey); // Giải phóng khóa
+    return 0;
+}
+```
+
+https://nexwebsites.com/blog/cpp_exceptions/
+
+
+https://hackingcpp.com/cpp/lang/exceptions.html
+
