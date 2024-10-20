@@ -1,0 +1,2 @@
+/Users/genson1808/workspace/cpp/MathLib/build/install/lib/libmathlib.0.0.1.dylib
+/Users/genson1808/workspace/cpp/MathLib/build/install/include/MathLib.hpp

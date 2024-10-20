@@ -1,0 +1,7 @@
+/Users/genson1808/workspace/cpp/hellowz/build/CMakeFiles/MyApp.dir
+/Users/genson1808/workspace/cpp/hellowz/build/CMakeFiles/edit_cache.dir
+/Users/genson1808/workspace/cpp/hellowz/build/CMakeFiles/rebuild_cache.dir
+/Users/genson1808/workspace/cpp/hellowz/build/CMakeFiles/list_install_components.dir
+/Users/genson1808/workspace/cpp/hellowz/build/CMakeFiles/install.dir
+/Users/genson1808/workspace/cpp/hellowz/build/CMakeFiles/install/local.dir
+/Users/genson1808/workspace/cpp/hellowz/build/CMakeFiles/install/strip.dir
