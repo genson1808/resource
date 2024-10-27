@@ -1,53 +1,50 @@
 # resource for research
 
+<https://plantuml-editor.kkeisuke.com/>
+
 # Cmake
 
-binh thuong run c program: gcc -o nameproout source.c 
+binh thuong run c program: gcc -o nameproout source.c
 
 bigger c program
-gcc -o      main         main.c         random.c               -lm 
-       outputFilename  SourceFile1    SourceFile2       LinkWithMathsLibrary
-
+gcc -o main main.c random.c -lm
+outputFilename SourceFile1 SourceFile2 LinkWithMathsLibrary
 
 Run power shell with admins
 
 Chocolatey Software Docs | Setup / Install
 
-
 Choco install minnow
 
-choco install python --pre 
+choco install python --pre
 
 Download vim
-https://www.vim.org/download.php
-
+<https://www.vim.org/download.php>
 
 > choco install neovim -y
 
-
 Rogger”1808
 
-
 ## cpp resource
-https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#S-faq
 
-https://github.com/balloonwj/CppCoreGuidelines
+<https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#S-faq>
 
-https://github.com/applenob/Cpp_Primer_Practice/tree/master
+<https://github.com/balloonwj/CppCoreGuidelines>
 
-https://github.com/AnkerLeng/Cpp-0-1-Resource
+<https://github.com/applenob/Cpp_Primer_Practice/tree/master>
 
-https://github.com/0voice/cpp_new_features
+<https://github.com/AnkerLeng/Cpp-0-1-Resource>
 
-https://github.com/changkun/modern-cpp-tutorial
+<https://github.com/0voice/cpp_new_features>
 
-https://github.com/0voice/introduce_c-cpp_manual?tab=readme-ov-file
+<https://github.com/changkun/modern-cpp-tutorial>
 
-https://daobook.github.io/cpp/book.html
+<https://github.com/0voice/introduce_c-cpp_manual?tab=readme-ov-file>
 
-
+<https://daobook.github.io/cpp/book.html>
 
 setup vim:
+
 ```
 -- Keymaps are automatically loaded on the VeryLazy event
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
@@ -68,12 +65,10 @@ keymap("t", "<C-l>", "<C-\\><C-n><C-w>l", default_opts)
 keymap("t", "<C-j>", require("cmp").mapping.select_next_item(), default_opts)
 ```
 
+<https://code.visualstudio.com/docs/cpp/config-wsl>
 
-https://code.visualstudio.com/docs/cpp/config-wsl
+# setting vscode
 
-
-
-# setting vscode 
 ```json
 {
     "workbench.colorTheme": "Andromeda",
@@ -131,13 +126,13 @@ https://code.visualstudio.com/docs/cpp/config-wsl
 }
 ```
 
-
-
 ```bash
 sudo apt-get update
 sudo apt-get install libssl-dev openssl
 ```
+
 rsa_example.cpp
+
 ```cpp
 #include <iostream>
 #include <openssl/rsa.h>
@@ -240,9 +235,6 @@ g++ rsa_example.cpp -o rsa_example -lssl -lcrypto
 ./rsa_example
 ```
 
-
-
-
 ```cpp
 #include <iostream>
 #include <fstream>
@@ -340,7 +332,7 @@ int validateOptionCode(const string& optionCode) {
     if (optionCode.empty()) {
         return OPTION_CODE_READ_ERROR;  // Không thể đọc mã tùy chọn
     }
-    
+
     // Kiểm tra định dạng của mã tùy chọn, ở đây chỉ là ví dụ về độ dài > 0
     if (optionCode.length() < 5) {
         return OPTION_CODE_FORMAT_ERROR;  // Định dạng mã tùy chọn không hợp lệ
@@ -403,5 +395,3 @@ int main() {
 
 -lssl: Liên kết thư viện libssl.
 -lcrypto: Liên kết thư viện libcrypto của OpenSSL.
-
-

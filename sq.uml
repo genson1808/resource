@@ -1,0 +1,59 @@
+@startuml
+participant File_System as "File System"
+actor Leader as "Leader"
+participant GUI as "GUI"
+participant Library as "Library"
+actor Customer as "Customer"
+participant NDI_Checker as "NDI Checker"
+
+
+
+Leader -> GUI : Enter Product Code, MAC Address, Expiration Date
+
+alt Product Code Selection
+    GUI -> GUI : Display Dropdown for Product Code
+    Leader -> GUI : Select Product Code from Dropdown
+else Product Code Input
+    Leader -> GUI : Enter Product Code
+    GUI -> GUI : Validate Product Code
+    alt Product Code Invalid
+        GUI -> Leader : Display Error Message (Invalid Product Code)
+    end
+end
+
+alt MAC Address Validation
+    Leader -> GUI : Enter MAC Address
+    GUI -> GUI : Validate MAC Address
+    alt MAC Address Invalid
+        GUI -> Leader : Display Error Message (Invalid MAC Address)
+    end
+end
+
+alt Expiration Date Selection
+    GUI -> GUI : Display Dropdown for Expiration Date
+    Leader -> GUI : Select Expiration Date from Dropdown
+else Expiration Date Input
+    Leader -> GUI : Enter Expiration Date
+    GUI -> GUI : Validate Expiration Date
+    alt Expiration Date Invalid
+        GUI -> Leader : Display Error Message (Invalid Expiration Date)
+    end
+end
+
+opt All Data Valid
+    GUI -> Library : Send Product Code, MAC Address, Expiration Date
+    Library -> Library : Process and Generate Public Key, Private Key, License File
+    Library -> GUI : Return Public Key, Private Key, License File
+    GUI -> File_System : Save Public Key, Private Key, License File in Folder
+    GUI -> Customer : Send Public Key, License File
+
+    Customer -> NDI_Checker : Enter Public Key, License File
+    NDI_Checker -> Library : Send Public Key, License File, Product Code
+    Library -> NDI_Checker : Validate License
+    alt License Valid
+        NDI_Checker -> Customer : Display Valid Notification
+    else License Invalid
+        NDI_Checker -> Customer : Display Invalid Notification
+    end
+end
+@enduml
